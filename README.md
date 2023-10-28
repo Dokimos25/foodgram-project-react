@@ -52,7 +52,7 @@ docker exec -it infra_backend_1 python manage.py createsuperuser
 Далее необходимо в панели администрирования создать несколько тегов.
 
 ## Проект доступен по адресам:
-[foodprod](http://foodprod.ddns.net/) и [http://158.160.75.108/](http://158.160.75.108/recipes)
+[foodprod](http://foodprod.ddns.net/) и [158.160.75.108](http://158.160.75.108/recipes)
 ## Технологический стек:
 • Python • Django • Django REST • Framework • PostgreSQL • Nginx • gunicorn • Docker • Docker-compose • Docker Hub • GitHubActions
 ## Автор:
