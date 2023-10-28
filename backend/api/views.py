@@ -97,8 +97,10 @@ class UserViewSet(BaseUserViewSet):
                 return Response(
                     {"errors": "Подписка уже оформлена"},
                     status=status.HTTP_400_BAD_REQUEST)
-            serializer = SubscriptionSerializer(subscription, 
-                                                context=self.get_serializer_context())
+            serializer = SubscriptionSerializer(
+                subscription, 
+                context=self.get_serializer_context()
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE':
             if subscriptions := Subscription.objects.filter(
@@ -193,13 +195,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def download_shopping_cart(self, request):
-        shopping_cart = ShoppingCartItem.objects.filter(
-            user=request.user
-        ).select_related(
-            'recipe'
-        ).prefetch_related(
-            'recipe__ingredients'
-        )
+        # shopping_cart = ShoppingCartItem.objects.filter(
+        #     user=request.user
+        # ).select_related(
+        #     'recipe'
+        # ).prefetch_related(
+        #     'recipe__ingredients'
+        # )
         ingredients = IngredientInRecipe.objects.filter(
             recipe__shopping_cart__user=request.user,
         ).select_related('ingredient').values(
@@ -209,7 +211,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             amount=Sum('amount')
         )
         output = '\n'.join([
-            f'{i["ingredient__name"]} - {i["amount"]}' 
+            f'{i["ingredient__name"]} - {i["amount"]}'
             f'{i["ingredient__measurement_unit"]}'
             for i in ingredients
         ])
@@ -218,7 +220,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             content_type='text/plain'
         )
         response['Content-Disposition'] = (
-        'attachment; filename="shopping_cart.txt"')
+        'attachment; filename="shopping_cart.txt"'
+        )
         return response
 
     @action(
