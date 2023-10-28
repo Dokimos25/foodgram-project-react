@@ -4,12 +4,12 @@
 
 Склонировать проект:
 ```bash
-git clone https://github.com/IT-Academy-2022/praktikum_new_diplom.git
+git clone git@github.com:Dokimos25/foodgram-project-react.git
 ```
 
 Сменить рабочую директорию:
 ```bash
-cd praktikum_new_diplom/infra
+cd foodgram-project-react/infra
 ```
 
 Заполнить файл `.env`:
