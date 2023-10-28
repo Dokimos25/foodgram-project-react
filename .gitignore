@@ -60,6 +60,7 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+media
 
 # Flask stuff:
 instance/
@@ -102,7 +103,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+infra/.env
 .venv
 env/
 venv/
@@ -130,3 +131,6 @@ dmypy.json
 
 # .idea
 .idea
+
+# other
+.DS_Store
