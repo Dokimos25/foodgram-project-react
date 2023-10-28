@@ -1,5 +1,5 @@
 from rest_framework.permissions import (BasePermission,
-SAFE_METHODS, IsAuthenticatedOrReadOnly)
+                                        SAFE_METHODS, IsAuthenticatedOrReadOnly)
 
 
 class IsAuthorOrReadOnly(IsAuthenticatedOrReadOnly):
