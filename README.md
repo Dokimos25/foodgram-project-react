@@ -1,4 +1,4 @@
-# praktikum_new_diplom
+# Foodgram
 
 ## Запуск проекта
 
@@ -50,3 +50,8 @@ docker exec -it infra_backend_1 python manage.py createsuperuser
 ```
 
 Далее необходимо в панели администрирования создать несколько тегов.
+
+## Технологический стек:
+• Python • Django • Django REST • Framework • PostgreSQL • Nginx • gunicorn • Docker • Docker-compose • Docker Hub • GitHubActions
+## Автор:
+[Анна Королькова](https://github.com/Dokimos25)
