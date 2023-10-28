@@ -217,8 +217,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             output,
             content_type='text/plain'
         )
-        response['Content-Disposition'] =
-        'attachment; filename="shopping_cart.txt"'
+        response['Content-Disposition'] = (
+        'attachment; filename="shopping_cart.txt"')
         return response
 
     @action(
