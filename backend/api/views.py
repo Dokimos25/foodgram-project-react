@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from djoser.views import UserViewSet as BaseUserViewSet
-from rest_framework import viewsets, status, permissions, mixins
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -97,7 +97,8 @@ class UserViewSet(BaseUserViewSet):
                 return Response(
                     {"errors": "Подписка уже оформлена"},
                     status=status.HTTP_400_BAD_REQUEST)
-            serializer = SubscriptionSerializer(subscription, context=self.get_serializer_context())
+            serializer = SubscriptionSerializer(subscription, 
+                                                context=self.get_serializer_context())
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE':
             if subscriptions := Subscription.objects.filter(
@@ -208,14 +209,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
             amount=Sum('amount')
         )
         output = '\n'.join([
-            f'{i["ingredient__name"]} - {i["amount"]} {i["ingredient__measurement_unit"]}'
+            f'{i["ingredient__name"]} - {i["amount"]} 
+            {i["ingredient__measurement_unit"]}'
             for i in ingredients
         ])
         response = HttpResponse(
             output,
             content_type='text/plain'
         )
-        response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        response['Content-Disposition'] =
+        'attachment; filename="shopping_cart.txt"'
         return response
 
     @action(
