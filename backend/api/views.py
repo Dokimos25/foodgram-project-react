@@ -98,7 +98,7 @@ class UserViewSet(BaseUserViewSet):
                     {"errors": "Подписка уже оформлена"},
                     status=status.HTTP_400_BAD_REQUEST)
             serializer = SubscriptionSerializer(
-                subscription, 
+                subscription,
                 context=self.get_serializer_context()
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
