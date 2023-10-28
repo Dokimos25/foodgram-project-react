@@ -209,8 +209,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             amount=Sum('amount')
         )
         output = '\n'.join([
-            f'{i["ingredient__name"]} - {i["amount"]} 
-            {i["ingredient__measurement_unit"]}'
+            f'{i["ingredient__name"]} - {i["amount"]}' 
+            f'{i["ingredient__measurement_unit"]}'
             for i in ingredients
         ])
         response = HttpResponse(
