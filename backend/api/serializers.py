@@ -9,11 +9,13 @@ from recipes.models import (
     Recipe,
     IngredientInRecipe,
     Favorite,
-    ShoppingCartItem,
 )
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор пользователя.
+    """
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -31,23 +33,34 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if user.is_anonymous or user == obj:
             return False
-        return Subscription.objects.filter(
-            user=obj, subscriber=user).exists()
+        return obj.subscribers.filter(subscriber=user).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор тегов.
+    """
+
     class Meta:
         model = Tag
         fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор ингредиентов.
+    """
+
     class Meta:
         model = Ingredient
         fields = '__all__'
 
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор ингредиентов в рецепте (только чтение).
+    """
+
     id = serializers.IntegerField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -65,6 +78,10 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
 
 
 class IngredientInRecipeWritableSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор ингредиентов в рецепте (для изменения).
+    """
+
     id = serializers.IntegerField()
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -82,6 +99,10 @@ class IngredientInRecipeWritableSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор рецептов.
+    """
+
     tags = TagSerializer(many=True)
     ingredients = IngredientInRecipeSerializer(
         source='ingredientinrecipe_set',
@@ -108,13 +129,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return ShoppingCartItem.objects.filter(
-            user=user,
-            recipe=obj,
-        ).exists()
+        return obj.shopping_cart.filter(user=user).exists()
 
 
 class RecipeWritableSerializer(RecipeSerializer):
+    """
+    Сериализатор рецептов для изменения.
+    """
+
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
     )
@@ -125,33 +147,35 @@ class RecipeWritableSerializer(RecipeSerializer):
         model = Recipe
         fields = '__all__'
 
+    def set_tags_and_ingredients(self, recipe, tags, ingredients):
+        """
+        Установка тегов и ингредиентов.
+        """
+        if tags:
+            recipe.tags.clear()
+            recipe.tags.set(tags)
+        if ingredients:
+            IngredientInRecipe.objects.filter(recipe=recipe).delete()
+            IngredientInRecipe.objects.bulk_create(
+                [IngredientInRecipe(
+                    recipe=recipe,
+                    ingredient_id=ingredient['id'],
+                    amount=ingredient['amount'],
+                ) for ingredient in ingredients]
+            )
+
     def create(self, validated_data):
         tags = validated_data.pop('tags', None)
         ingredients = validated_data.pop('ingredients', None)
         recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        IngredientInRecipe.objects.bulk_create(
-            [IngredientInRecipe(
-                recipe=recipe,
-                ingredient_id=ingredient['id'],
-                amount=ingredient['amount'],
-            ) for ingredient in ingredients]
-        )
+        self.set_tags_and_ingredients(recipe, tags, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags', None)
         ingredients = validated_data.pop('ingredients', None)
         instance = super().update(instance, validated_data)
-        instance.tags.set(tags)
-        IngredientInRecipe.objects.filter(recipe=instance).delete()
-        IngredientInRecipe.objects.bulk_create(
-            [IngredientInRecipe(
-                recipe=instance,
-                ingredient_id=ingredient['id'],
-                amount=ingredient['amount'],
-            ) for ingredient in ingredients]
-        )
+        self.set_tags_and_ingredients(instance, tags, ingredients)
         return instance
 
     def validate_image(self, value):
@@ -190,6 +214,10 @@ class RecipeWritableSerializer(RecipeSerializer):
 
 
 class RecipeInSubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор рецептов в подписках.
+    """
+
     class Meta:
         model = Recipe
         fields = (
@@ -201,6 +229,11 @@ class RecipeInSubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор подписок.
+    Используется только для просмотра своих подписок.
+    """
+
     id = serializers.ReadOnlyField(source='user.id')
     username = serializers.ReadOnlyField(source='user.username')
     email = serializers.ReadOnlyField(source='user.email')
@@ -224,12 +257,21 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
+        """
+        Всегда будет True
+        """
         return True
 
     def get_recipes_count(self, obj):
+        """
+        Количество рецептов пользователя
+        """
         return obj.user.recipes.count()
 
     def get_recipes(self, obj):
+        """
+        Список рецептов пользователя
+        """
         request = self.context.get('request')
         recipes_limit = request.GET.get('recipes_limit')
         recipes = obj.user.recipes.all()
