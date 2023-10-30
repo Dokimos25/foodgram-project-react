@@ -63,6 +63,10 @@ class UserViewSet(BaseUserViewSet):
     @action(detail=False, methods=['get'],
             permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
+        """
+        Возвращает список подписок
+        для авторизованного пользователя
+        """
         subscriptions = Subscription.objects.filter(
             subscriber=request.user
         ).select_related(
@@ -83,6 +87,9 @@ class UserViewSet(BaseUserViewSet):
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
     def subscribe(self, request, id=None):
+        """
+        Подписка/отписка на автора
+        """
         subscriber = request.user
         user = self.get_object()
         if request.method == 'POST':
@@ -143,9 +150,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = False
-        return self.update(request, *args, **kwargs)
 
     @action(
         detail=True,
@@ -153,6 +157,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def shopping_cart(self, request, pk=None):
+        """
+        Добавление/удаление рецепта из корзины
+        """
         if request.method == 'POST':
             try:
                 recipe = Recipe.objects.get(pk=pk)
@@ -195,6 +202,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def download_shopping_cart(self, request):
+        """
+        Скачивание списка покупок в формате .txt
+        """
         ingredients = IngredientInRecipe.objects.filter(
             recipe__shopping_cart__user=request.user,
         ).select_related('ingredient').values(
@@ -223,6 +233,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def favorite(self, request, pk=None):
+        """
+        Добавление/удаление рецепта из избранного
+        """
         if request.method == 'POST':
             try:
                 recipe = Recipe.objects.get(pk=pk)
