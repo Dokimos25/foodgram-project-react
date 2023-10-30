@@ -30,6 +30,7 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
+        db_index=True,
         max_length=255,
         verbose_name='Название'
     )
@@ -58,7 +59,7 @@ class IngredientInRecipe(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
-    amount = models.PositiveIntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         default=1
     )
