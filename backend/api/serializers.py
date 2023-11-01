@@ -1,6 +1,6 @@
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from drf_extra_fields.fields import Base64ImageField
 
 from authentication.models import User, Subscription
 from recipes.models import (
@@ -178,34 +178,32 @@ class RecipeWritableSerializer(RecipeSerializer):
         self.set_tags_and_ingredients(instance, tags, ingredients)
         return instance
 
-    def validate_image(self, value):
-        if not value:
-            raise ValidationError('Изображение не выбрано')
-        return value
-
-    def validate_ingredients(self, value):
-        if not value:
+    def validate(self, attrs):
+        ingredients = attrs.get('ingredients')
+        if not ingredients:
             raise ValidationError('Нужен хотя бы один ингредиент')
-        ingredient_ids = [ingredient['id'] for ingredient in value]
+        ingredient_ids = [ingredient['id'] for ingredient in ingredients]
         if len(ingredient_ids) != len(set(ingredient_ids)):
             raise ValidationError('Ингредиенты не должны повторяться')
-        for ingredient in value:
+        for ingredient in ingredients:
             if ingredient['amount'] <= 0:
                 raise ValidationError(
                     'Количество ингредиента должно быть больше 0'
                 )
-            if Ingredient.objects.filter(pk=ingredient['id']).exists():
-                continue
-            raise ValidationError('Такого ингредиента не существует')
-        return value
+            if not Ingredient.objects.filter(pk=ingredient['id']).exists():
+                raise ValidationError('Такого ингредиента не существует')
 
-    def validate_tags(self, value):
-        if not value:
+        tags = attrs.get('tags')
+        if not tags:
             raise ValidationError('Нужен хотя бы один тег')
-        tag_ids = [tag.id for tag in value]
+        tag_ids = [tag.id for tag in tags]
         if len(tag_ids) != len(set(tag_ids)):
             raise ValidationError('Теги не должны повторяться')
-        return value
+
+        image = attrs.get('image')
+        if not image:
+            raise ValidationError('Изображение не выбрано')
+        return attrs
 
     def to_representation(self, instance):
         request = self.context.get('request')
